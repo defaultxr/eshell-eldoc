@@ -1,0 +1,12 @@
+#+TITLE: Eshell-Eldoc
+#+DESCRIPTION: Eldoc support for Eshell.
+
+Eshell-Eldoc is ~eldoc-mode~ support for ~eshell~.
+
+Eshell-Eldoc first checks for elisp functions named by eshell's input and uses Emacs' built in eldoc functionality to display documentation if one is found.
+
+If no elisp or eshell function with the name is found, the whatis(1) command is used to get a description of a shell command of the input text. Caching is built in to the whatis lookup, so slowdown should be minimal for repeatedly-typed inputs.
+
+* Installation
+
+Available via MELPA soon! Once it is, you should just be able to install it and immediately get its functionality on all future Eshell buffers.
