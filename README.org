@@ -9,4 +9,16 @@ If no elisp or eshell function with the name is found, the whatis(1) command is 
 
 * Installation
 
-Available via MELPA soon! Once it is, you should just be able to install it and immediately get its functionality on all future Eshell buffers.
+Available via MELPA soon!
+
+Once it is, simply install it, and then evaluate and add the following to your init file:
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'eshell-mode-hook 'eshell-eldoc-enable-for-buffer)
+#+END_SRC
+
+* Future
+
+- It would be nice if it were possible to make this package automatically enable itself (i.e. without requiring the user to use ~add-hook~). I'm not sure if this is possible.
+
+- Use ~whatis~'s ~-l~ option to get the full description of the command without abbreviation. This seems to be only required with GNU whatis and causes an error on Darwin (and probably BSD).

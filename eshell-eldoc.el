@@ -50,6 +50,8 @@
 ;;   "Whether or not to cache results from whatis(1)."
 ;;   :type '(boolean))
 
+;; code
+
 (require 's)
 (require 'eldoc)
 (require 'eshell)
@@ -63,19 +65,28 @@
     (if cache-result
         (unless (eql 'none cache-result)
           cache-result)
-      (let ((whatis (shell-command-to-string (concat "whatis " command))))
-        (if (s-ends-with-p "nothing appropriate.\n" whatis) ;; FIX: use exit status instead...
-            (puthash command 'none eshell-eldoc-whatis-cache)
-          (puthash command (s-replace-regexp "\s+" " " (substring whatis 0 (position ?\n whatis))) eshell-eldoc-whatis-cache))))))
+      (with-temp-buffer
+        (let ((whatis-result (apply 'call-process "whatis" nil t nil ;; "-l" ;; the -l (long) is not needed/supported on BSD/Darwin/etc...
+                                    command)))
+          (if (= 0 whatis-result)
+              (progn
+                (goto-char 1)
+                (puthash command (s-replace-regexp "\s+" " " (buffer-substring 1 (or (1- (search-forward "\n" nil t)) (point-max))))
+                         eshell-eldoc-whatis-cache))
+            (progn
+              (puthash command 'none eshell-eldoc-whatis-cache)
+              nil)))))))
+
+;; (progn (package-initialize) (require 'use-package) (find-file "~/.emacs.d/init.el"))
 
 ;;;###autoload
-(defun eshell-eldoc-documentation-function () ;; FIX: finish this...
+(defun eshell-eldoc-documentation-function ()
   "`eldoc-documentation-function' for Eshell."
   ;; (symbol-value (intern-soft (upcase (thing-at-point 'symbol))
   ;;                            tal-eldoc-obarray))
   (let* ((input (buffer-substring eshell-last-output-end (point-max)))
          (command (split-string input)))
-    (when (plusp (length input)) ;; FIX: #'length is slow...
+    (unless (string-equal "" input) ;; don't try to provide eldoc information if there is no input.
       (cond ((string-equal (substring input 0 1) "(")
              (elisp-eldoc-documentation-function))
             ((or (fboundp (intern (elt command 0))) ;; FIX
@@ -89,8 +100,11 @@
             (t
              (eshell-eldoc-whatis (elt command 0)))))))
 
-(add-function :before-until (local 'eldoc-documentation-function)
-              #'eshell-eldoc-documentation-function)
+;;;###autoload
+(defun eshell-eldoc-enable-for-buffer ()
+  "Enable Eshell-Eldoc for the current buffer."
+  (interactive)
+  (setq-local eldoc-documentation-function 'eshell-eldoc-documentation-function))
 
 (provide 'eshell-eldoc)
 
