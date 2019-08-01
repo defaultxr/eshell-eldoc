@@ -5,7 +5,7 @@ Eshell-Eldoc is ~eldoc-mode~ support for ~eshell~.
 
 Eshell-Eldoc first checks for elisp functions named by eshell's input and uses Emacs' built in eldoc functionality to display documentation if one is found.
 
-If no elisp or eshell function with the name is found, the whatis(1) command is used to get a description of a shell command of the input text. Caching is built in to the whatis lookup, so slowdown should be minimal for repeatedly-typed inputs.
+If no elisp or eshell function with the name is found, the ~whatis(1)~ command is used to get a description of a shell command of the input text. Caching is built in to the whatis lookup, so slowdown should be minimal for repeatedly-typed inputs.
 
 * Installation
 
@@ -21,4 +21,6 @@ Once it is, simply install it, and then evaluate and add the following to your i
 
 - It would be nice if it were possible to make this package automatically enable itself (i.e. without requiring the user to use ~add-hook~). I'm not sure if this is possible.
 
-- Use ~whatis~'s ~-l~ option to get the full description of the command without abbreviation. This seems to be only required with GNU whatis and causes an error on Darwin (and probably BSD).
+* Similar Libraries
+
+- [[https://gitlab.com/ambrevar/emacs-fish-completion][emacs-fish-completion]] - for Fish shell-like command completion in eshell.

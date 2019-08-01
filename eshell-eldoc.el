@@ -1,11 +1,11 @@
 ;;; eshell-eldoc.el --- Eldoc support for Eshell
 
-;; Copyright (C) 2016 modula t.
+;; Copyright (C) 2019 modula t.
 
 ;; Author: modula t. <defaultxr@gmail.com>
 ;; Homepage: https://github.com/defaultxr/eshell-eldoc
-;; Version: 0.5
-;; Package-Requires: ((osc "0.1") (emacs "24.4"))
+;; Version: 0.9
+;; Package-Requires: ((emacs "21.0") eldoc eshell)
 ;; Keywords: convenience
 
 ;; This file is not part of GNU Emacs.
@@ -15,7 +15,7 @@
 ;; the Free Software Foundation, either version 3 of the License, or
 ;; (at your option) any later version.
 
-;; Foobar is distributed in the hope that it will be useful,
+;; Eshell-Eldoc is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
@@ -52,7 +52,6 @@
 
 ;; code
 
-(require 's)
 (require 'eldoc)
 (require 'eshell)
 
@@ -66,39 +65,47 @@
         (unless (eql 'none cache-result)
           cache-result)
       (with-temp-buffer
-        (let ((whatis-result (apply 'call-process "whatis" nil t nil ;; "-l" ;; the -l (long) is not needed/supported on BSD/Darwin/etc...
-                                    command)))
+        (let ((whatis-result (call-process "env" nil t nil
+                                           "COLUMNS=1000" ;; GNU whatis truncates its output to the size of the terminal.
+                                           "whatis"
+                                           command)))
           (if (= 0 whatis-result)
               (progn
                 (goto-char 1)
-                (puthash command (s-replace-regexp "\s+" " " (buffer-substring 1 (or (1- (search-forward "\n" nil t)) (point-max))))
+                (puthash command (replace-regexp-in-string "\s+" " " (buffer-substring 1 (or (1- (search-forward "\n" nil t)) (point-max))))
                          eshell-eldoc-whatis-cache))
             (progn
               (puthash command 'none eshell-eldoc-whatis-cache)
               nil)))))))
 
-;; (progn (package-initialize) (require 'use-package) (find-file "~/.emacs.d/init.el"))
+(defun eshell-eldoc-pseudo-elisp-eldoc (input point)
+  "Get the eldoc documentation string for INPUT as typed into Eshell, with point at location POINT in INPUT."
+  (with-temp-buffer ;; we have to pretend there is parentheses around the input for elisp's eldoc function to work...
+    (insert "(")
+    (insert input)
+    (insert ")")
+    (goto-char point)
+    (elisp-eldoc-documentation-function)))
 
 ;;;###autoload
 (defun eshell-eldoc-documentation-function ()
   "`eldoc-documentation-function' for Eshell."
-  ;; (symbol-value (intern-soft (upcase (thing-at-point 'symbol))
-  ;;                            tal-eldoc-obarray))
-  (let* ((input (buffer-substring eshell-last-output-end (point-max)))
-         (command (split-string input)))
+  (let* ((start eshell-last-output-end)
+         (point (point))
+         (input (buffer-substring start (point-max)))
+         (command (split-string input))
+         (eshell-cmd nil))
     (unless (string-equal "" input) ;; don't try to provide eldoc information if there is no input.
-      (cond ((string-equal (substring input 0 1) "(")
-             (elisp-eldoc-documentation-function))
-            ((or (fboundp (intern (elt command 0))) ;; FIX
-                 (fboundp (intern (concat "eshell/" (elt command 0)))))
-             (with-temp-buffer
-               (insert "(")
-               (insert input)
-               (insert ")")
+      (let ((whatis (eshell-eldoc-whatis (elt command 0))))
+        (cond ((string-equal (substring input 0 1) "(")
                (elisp-eldoc-documentation-function))
-             "Not done yet...")
-            (t
-             (eshell-eldoc-whatis (elt command 0)))))))
+              ((fboundp (intern (concat "eshell/" (elt command 0))))
+               (eshell-eldoc-pseudo-elisp-eldoc (concat "eshell/" input) (- point start)))
+              (whatis
+               whatis)
+              ((fboundp (intern (elt command 0)))
+               (eshell-eldoc-pseudo-elisp-eldoc input (- point start)))
+              (t nil))))))
 
 ;;;###autoload
 (defun eshell-eldoc-enable-for-buffer ()
