@@ -1,11 +1,12 @@
+;; -*- lexical-binding: t -*-
 ;;; eshell-eldoc.el --- Eldoc support for Eshell
 
 ;; Copyright (C) 2019 modula t.
 
 ;; Author: modula t. <defaultxr@gmail.com>
 ;; Homepage: https://github.com/defaultxr/eshell-eldoc
-;; Version: 0.9
-;; Package-Requires: ((emacs "21.0") eldoc eshell)
+;; Version: 1.0
+;; Package-Requires: ((emacs "24.3"))
 ;; Keywords: convenience
 
 ;; This file is not part of GNU Emacs.
@@ -34,23 +35,6 @@
 ;; slowdown should be minimal for repeatedly-typed inputs.
 
 ;;; Code:
-
-;; custom
-
-(defgroup eshell-eldoc nil
-  "Eldoc support for Eshell."
-  :group 'external
-  :prefix "eshell-eldoc-")
-
-;; (defcustom eshell-eldoc-use-whatis t ;; FIX: implement
-;;   "Whether or not to get external command descriptions using whatis(1)."
-;;   :type '(boolean))
-
-;; (defcustom eshell-eldoc-use-whatis-cache t ;; FIX: implement
-;;   "Whether or not to cache results from whatis(1)."
-;;   :type '(boolean))
-
-;; code
 
 (require 'eldoc)
 (require 'eshell)
