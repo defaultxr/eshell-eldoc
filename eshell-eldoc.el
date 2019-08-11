@@ -77,8 +77,7 @@
   (let* ((start eshell-last-output-end)
          (point (point))
          (input (buffer-substring start (point-max)))
-         (command (split-string input))
-         (eshell-cmd nil))
+         (command (split-string input)))
     (unless (string-equal "" input) ;; don't try to provide eldoc information if there is no input.
       (let ((whatis (eshell-eldoc-whatis (elt command 0))))
         (cond ((string-equal (substring input 0 1) "(")
