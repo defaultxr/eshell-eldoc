@@ -1,5 +1,4 @@
-;; -*- lexical-binding: t -*-
-;;; eshell-eldoc.el --- Eldoc support for Eshell
+;;; eshell-eldoc.el --- Eldoc support for Eshell. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2019 modula t.
 
