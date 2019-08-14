@@ -17,10 +17,16 @@ Once it is, simply install it, and then evaluate and add the following to your i
 (add-hook 'eshell-mode-hook 'eshell-eldoc-enable-for-buffer)
 #+END_SRC
 
+Note that for ~whatis~ to actually return results, you may need to run the ~mandb~ command as root to regenerate the manpage index.
+
+You may need to run this command again if a newly-installed program isn't being picked up. And since ~eshell-eldoc~ caches the results from ~whatis~ (including empty results), you may also need to clear the cache with the ~eshell-eldoc-clear-cache~ command, or restart Emacs.
+
 * Future
 
 - It would be nice if it were possible to make this package automatically enable itself (i.e. without requiring the user to use ~add-hook~). I'm not sure if this is possible.
 
 * Similar Libraries
+
+- [[https://github.com/tom-tan/esh-help][esh-help]] - provides similar eldoc support for eshell and external, but gives the "SYNOPSIS" from a command's manpage instead of the summary from ~whatis~.
 
 - [[https://gitlab.com/ambrevar/emacs-fish-completion][emacs-fish-completion]] - for Fish shell-like command completion in eshell.
