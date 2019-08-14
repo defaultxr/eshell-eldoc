@@ -41,6 +41,11 @@
 (defvar eshell-eldoc-whatis-cache (make-hash-table :test #'equal)
   "The cache of results from the whatis(1) utility for eshell-eldoc.")
 
+(defun eshell-eldoc-clear-cache ()
+  "Clear the cache of results from \"whatis\"."
+  (interactive)
+  (setq eshell-eldoc-whatis-cache (make-hash-table :test #'equal)))
+
 (defun eshell-eldoc-whatis (command)
   "Lookup the \"whatis\" description of COMMAND, using the `eshell-eldoc-whatis-cache' if possible."
   (let ((cache-result (gethash command eshell-eldoc-whatis-cache)))
